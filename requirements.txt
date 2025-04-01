@@ -1,0 +1,6 @@
+flask
+pygame
+whisper
+pydub
+RPi.GPIO
+numpy

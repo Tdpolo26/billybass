@@ -1,0 +1,29 @@
+# Ignore audio uploads and converted files
+uploads/
+*.wav
+*.mp3
+*.wma
+*.ogg
+*.flac
+
+# Ignore analysis outputs
+*.json
+
+# Ignore system and Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore virtual environment
+venv/
+.env/
+
+# Ignore backup files
+*.bak
+*.tmp
+*~
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db

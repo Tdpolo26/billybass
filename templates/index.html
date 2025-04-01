@@ -12,31 +12,33 @@
         .bar { width: 1px; background: #000; }
     </style>
     <script>
-    function toggleTimeline(id) {
-        const sections = document.querySelectorAll(`#${id} .timeline`);
-        sections.forEach(el => el.style.display = el.style.display === 'block' ? 'none' : 'block');
-    }
-    window.onload = () => {
-        document.querySelectorAll(".timeline[data-ticks]").forEach(bar => {
-            const ticks = JSON.parse(bar.dataset.ticks);
-            const duration = parseFloat(bar.dataset.duration);
-            ticks.forEach(t => {
-                const el = document.createElement("div");
-                el.className = "tick";
-                el.style.left = (t / duration * 100) + "%";
-                bar.appendChild(el);
+        function toggleTimeline(id) {
+            const sections = document.querySelectorAll(`#${id} .timeline`);
+            sections.forEach(el => el.style.display = el.style.display === 'block' ? 'none' : 'block');
+        }
+
+        window.onload = () => {
+            document.querySelectorAll(".timeline[data-ticks]").forEach(bar => {
+                const ticks = JSON.parse(bar.dataset.ticks);
+                const duration = parseFloat(bar.dataset.duration);
+                ticks.forEach(t => {
+                    const el = document.createElement("div");
+                    el.className = "tick";
+                    el.style.left = (t / duration * 100) + "%";
+                    bar.appendChild(el);
+                });
             });
-        });
-        document.querySelectorAll(".waveform[data-points]").forEach(wf => {
-            const points = JSON.parse(wf.dataset.points);
-            points.forEach(h => {
-                const div = document.createElement("div");
-                div.className = "bar";
-                div.style.height = (h * 100) + "%";
-                wf.appendChild(div);
+
+            document.querySelectorAll(".waveform[data-points]").forEach(wf => {
+                const points = JSON.parse(wf.dataset.points);
+                points.forEach(h => {
+                    const div = document.createElement("div");
+                    div.className = "bar";
+                    div.style.height = (h * 100) + "%";
+                    wf.appendChild(div);
+                });
             });
-        });
-    };
+        };
     </script>
 </head>
 <body>
@@ -61,43 +63,47 @@
                 <button type=submit>Set Smoothness</button>
             </form>
         </div>
-    </div>
-    <div class="right">
-        <h2>Tracks</h2>
-        {% for path, meta in files %}
-        <div id="track{{ loop.index }}" style="border:1px solid #aaa; padding:10px; margin:10px;">
-            <b onclick="toggleTimeline('track{{ loop.index }}')" style="cursor:pointer;">{{ meta.name }}</b> ({{ meta.duration }}s)
-            <br><small>{{ meta.date }}</small><br>
-            <form method=post style="display:inline;">
-                <input type=hidden name=play value="{{ path }}">
-                <button type=submit>? Play</button>
+        <div class="section"><h2>Manual Motor Control</h2>
+            {% for motor, value in pwm.items() %}
+            <form method=post>
+                {{ motor.capitalize() }} PWM:
+                <input type=range name=pwm min=0 max=100 value="{{ value }}">
+                <input type=hidden name=motor value="{{ motor }}">
+                <button type=submit>Update</button>
             </form>
-            <form method=post style="display:inline;">
-                <input type=hidden name=pause value="1">
-                <button type=submit>? Pause</button>
+            <form method=post action="/test/{{ motor }}">
+                <button type=submit>Test {{ motor.capitalize() }}</button>
             </form>
-            <form method=post style="display:inline;">
-                <input type=hidden name=delete value="{{ path }}">
-                <button type=submit>?? Delete</button>
-            </form>
-            <div class="waveform" data-points='{{ meta.waveform | tojson }}'></div>
-            <div class="timeline" data-ticks='{{ meta.mouth | tojson }}' data-duration='{{ meta.duration }}'></div>
-            <div class="timeline" data-ticks='{{ meta.body | tojson }}' data-duration='{{ meta.duration }}'></div>
-            <div class="timeline" data-ticks='{{ meta.tail | tojson }}' data-duration='{{ meta.duration }}'></div>
+            {% endfor %}
         </div>
-        {% endfor %}
-        <h2>Test & Calibrate</h2>
-        {% for motor, value in pwm.items() %}
-        <form method=post>
-            {{ motor.capitalize() }} PWM:
-            <input type=range name=pwm min=0 max=100 value="{{ value }}">
-            <input type=hidden name=motor value="{{ motor }}">
-            <button type=submit>Update</button>
-        </form>
-        <form method=post action="/test/{{ motor }}">
-            <button type=submit>Test {{ motor.capitalize() }}</button>
-        </form>
-        {% endfor %}
+    </div>
+
+    <div class="right">
+        <h2>Billy Bass Songs</h2>
+        {% if files %}
+            {% for path, meta in files %}
+            <div id="track{{ loop.index }}" style="border:1px solid #aaa; padding:10px; margin:10px;">
+                <b onclick="toggleTimeline('track{{ loop.index }}')" style="cursor:pointer;">{{ meta.name }}</b>
+                ({{ meta.duration }}s)<br>
+                <small>{{ meta.date }}</small><br>
+                <form method=post style="display:inline;">
+                    <input type=hidden name=play value="{{ path }}"><button type=submit>? Play</button>
+                </form>
+                <form method=post style="display:inline;">
+                    <input type=hidden name=pause value="1"><button type=submit>? Pause</button>
+                </form>
+                <form method=post style="display:inline;">
+                    <input type=hidden name=delete value="{{ path }}"><button type=submit>?? Delete</button>
+                </form>
+                <div class="waveform" data-points='{{ meta.waveform | tojson }}'></div>
+                <div class="timeline" data-ticks='{{ meta.mouth | tojson }}' data-duration='{{ meta.duration }}'></div>
+                <div class="timeline" data-ticks='{{ meta.body | tojson }}' data-duration='{{ meta.duration }}'></div>
+                <div class="timeline" data-ticks='{{ meta.tail | tojson }}' data-duration='{{ meta.duration }}'></div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No songs found</p>
+        {% endif %}
     </div>
 </body>
 </html>
