@@ -1,11 +1,11 @@
 {
   "volume": 1.0,
   "pwm": {
-    "mouth": 100,
-    "body": 92,
+    "mouth": 98,
+    "body": 100,
     "tail": 100
   },
-  "smoothing": 5,
+  "smoothing": 10,
   "favorites": [],
   "autoplay": false
 }
